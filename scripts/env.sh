@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Shared portable environment; no site activation or package installation.
+_BARYLORA_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+export PYTHONPATH="$_BARYLORA_ROOT${PYTHONPATH:+:$PYTHONPATH}"
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=${PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION:-python}
+export HF_HOME=${HF_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/huggingface}
+export HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-${OFFLINE:-0}}
+export TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-${OFFLINE:-0}}
+export HF_DATASETS_OFFLINE=${HF_DATASETS_OFFLINE:-${OFFLINE:-0}}
+export HF_EVALUATE_OFFLINE=${HF_EVALUATE_OFFLINE:-${OFFLINE:-0}}
+export TOKENIZERS_PARALLELISM=false

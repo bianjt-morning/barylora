@@ -1,0 +1,96 @@
+# BaryLoRA final GLUE configuration (our method only).
+# Backbone RoBERTa-Large, federated Dirichlet (lda) split, product-space
+# consensus with state-conditioned client-layer masses. No baselines, no ablation arms.
+seed: 42
+use_gpu: True
+device: 0
+eval_device: 0
+
+early_stop:
+  patience: 0
+
+federate:
+  mode: standalone
+  method: FedAvg
+  client_num: 3
+  sample_client_num: 3
+  total_round_num: 250
+  freeze_A: False
+  share_local_model: True
+  online_aggr: False
+  make_global_eval: True
+  use_ss: False
+  save_to: "barylora_roberta_large_glue.ckpt"
+
+asyn:
+  use: False
+
+aggregator:
+  robust_rule: fedavg
+
+personalization:
+  local_param: []
+
+data:
+  root: data/
+  type: 'mnli@glue'
+  matched: True
+  splitter: 'lda'
+  splitter_args: [{'alpha': 0.5}]
+
+llm:
+  tok_len: 128
+  cache:
+    model: ""
+  adapter:
+    use: True
+    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora',
+              'r': 4, 'lora_alpha': 8, 'lora_dropout': 0.05 } ]
+
+dataloader:
+  batch_size: 128
+
+model:
+  type: 'FacebookAI/roberta-large@huggingface_llm'
+
+train:
+  local_update_steps: 10
+  batch_or_epoch: batch
+  is_enable_half: False
+  optimizer:
+    type: AdamW
+    lr: 0.0005
+
+criterion:
+  type: CrossEntropyLoss
+
+trainer:
+  type: gluetrainer
+
+eval:
+  freq: 1
+  metrics: ['accuracy']
+  count_flops: False
+  best_res_update_round_wise_key: 'val_accuracy'
+
+quantization:
+  method: none
+
+lora:
+  use_lora: True
+  method: barylora
+  bary_rank: -1
+  # --- our algorithm (final) ---
+  bary_local_update: True
+  bary_step_scale: 0.25
+  bary_prior_scale: 0.01
+  bary_warmup_rounds: 1
+  bary_mass_rule: state
+  bary_head_inheritance: 'off'
+  bary_mass_clip: 2.0
+  bary_rank_return: qr_core
+  bary_local_rank_return: randomized
+  bary_local_rank_return_q: 24
+  bary_local_rank_return_niter: 4
+  bary_send_state_summary: True
+  bary_aggregation_device: cpu

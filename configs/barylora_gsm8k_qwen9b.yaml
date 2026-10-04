@@ -1,0 +1,58 @@
+# BaryLoRA retained GSM8K configuration; provide model/data paths at runtime.
+# Numerical settings are unchanged from the validated release source.
+# Generation evaluation is opt-in: eval.llm_generation True.
+use_gpu: True
+device: 0
+eval_device: 0
+outdir: outputs/gsm8k/qwen9b
+expname: barylora_gsm8k_qwen9b
+early_stop:
+  patience: 0
+federate:
+  mode: standalone
+  method: FedAvg
+  client_num: 3
+  sample_client_num: 3
+  total_round_num: 100
+  share_local_model: True
+  online_aggr: False
+  freeze_A: False
+  save_to: outputs/gsm8k/qwen9b/ckpts/barylora_gsm8k_qwen9b.ckpt
+  save_freq: 40
+data:
+  root: data/llm
+  type: 'gsm8k@llm'
+  splits: [0.998,0.001,0.001]
+  splitter: 'iid'
+llm:
+  tok_len: 650
+  chat:
+    max_len: 1000
+  adapter:
+    use: True
+    args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 16, 'lora_dropout': 0.05, 'target_modules': [ 'q_proj', 'v_proj' ] } ]
+dataloader:
+  batch_size: 1
+model:
+  type: models/Qwen3.5-9B@huggingface_llm
+train:
+  local_update_steps: 30
+  batch_or_epoch: batch
+  optimizer:
+    lr: 0.005
+  is_enable_half: True
+criterion:
+  type: CrossEntropyLoss
+trainer:
+  type: llmtrainer
+eval:
+  freq: 200
+  metrics: ['acc']
+  best_res_update_round_wise_key: val_acc
+  count_flops: False
+lora:
+  method: "barylora"
+  bary_local_update: True
+  bary_step_scale: 0.25
+  bary_prior_scale: 0.01
+  bary_warmup_rounds: 1
