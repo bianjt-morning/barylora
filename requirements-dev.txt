@@ -1,0 +1,2 @@
+# Tests are optional and are not imported by training.
+pytest

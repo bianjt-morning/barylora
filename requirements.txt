@@ -1,0 +1,16 @@
+# Direct runtime dependency scope, not an exact version lock.
+# Install the CPU/CUDA torch build appropriate for your machine first.
+torch
+transformers
+peft
+accelerate
+datasets
+evaluate
+numpy
+scipy
+pandas
+scikit-learn
+PyYAML
+grpcio
+protobuf
+pympler
